@@ -77,6 +77,13 @@ The system provides an interactive admin dashboard for monitoring parking availa
 </p>
 
 ---
+## 💸 Transaction History
+
+<p align="center">
+  <img src="Screenshot/Transaction History.png" width="700">
+</p>
+
+---
 
 # 🛠️ Technologies Used
 
