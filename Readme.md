@@ -49,7 +49,7 @@ The system provides an interactive admin dashboard for monitoring parking availa
 ## 📹 Live Camera
 
 <p align="center">
-  <img src="Screenshot/Camera.png" width="700">
+  <img src="Screenshot/live Camera.png" width="700">
 </p>
 
 ---
