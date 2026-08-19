@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <img src="Screenshot/Home-Page.png" width="850">
+  <img src="Screenshot/Home Page.png" width="850">
 </p>
 
 ---
@@ -44,7 +44,7 @@ The system provides an interactive admin dashboard for monitoring parking availa
 ## 🔐 Front Page
 
 <p align="center">
-  <img src="Screenshot/Front-Page.png" width="700">
+  <img src="Screenshot/Front Page.png" width="700">
 </p>
 
 ---
@@ -68,7 +68,7 @@ The system provides an interactive admin dashboard for monitoring parking availa
 ## 🏠 Smart Parking Dashboard
 
 <p align="center">
-  <img src="Screenshot/Home-Page.png" width="700">
+  <img src="Screenshot/Home page.png" width="700">
 </p>
 
 ---
@@ -76,7 +76,7 @@ The system provides an interactive admin dashboard for monitoring parking availa
 ## 🅿️ Parking Slot Booking Area
 
 <p align="center">
-  <img src="Screenshot/Slot-Booking-Area.png" width="700">
+  <img src="Screenshot/Slot Booking Area.png" width="700">
 </p>
 
 ---
