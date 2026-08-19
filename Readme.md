@@ -6,9 +6,6 @@
   Built with HTML5, CSS3 & JavaScript
 </p>
 
-<p align="center">
-  <img src="Screenshot/Home Page.png" width="850">
-</p>
 
 ---
 
@@ -18,7 +15,7 @@
 
 The system provides an interactive admin dashboard for monitoring parking availability, managing vehicle entry and exit, controlling parking gates, accessing a live camera feed, and maintaining parking transaction records.
 
-> 🚀 This project is currently a **frontend-based smart parking simulation** and can be extended with IoT, database, computer vision, and cloud technologies.
+> This project is currently a **frontend-based smart parking simulation** and can be extended with IoT, database, computer vision, and cloud technologies.
 
 ---
 
@@ -60,7 +57,7 @@ The system provides an interactive admin dashboard for monitoring parking availa
 ## 🚪 Entry & Exit Gate
 
 <p align="center">
-  <img src="Screenshots/Gate.png" width="700">
+  <img src="Screenshot/Gate.png" width="700">
 </p>
 
 ---
