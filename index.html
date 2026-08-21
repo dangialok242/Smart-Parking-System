@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Smart Parking & Real-Time Plate Capture</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- OCR Engine for Live Number Plate Extraction -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+</head>
+<body>
+
+    <!-- Vehicle Details Modal Card -->
+    <div id="vehicleDetailsModal" class="modal-overlay">
+        <div class="details-card">
+            <div class="card-header">
+                <span class="badge-verified">✓ RTO REGISTRATION DETECTED</span>
+                <button class="close-card-btn" onclick="closeDetailsModal()">✕</button>
+            </div>
+            <div class="car-badge-preview">
+                <span class="car-icon">🚘</span>
+                <div>
+                    <h3 id="modalPlateNum">DL 01 AB 1234</h3>
+                    <p id="modalVehicleModel">Tesla Model 3 / Sedan</p>
+                </div>
+            </div>
+            <div class="details-grid">
+                <div class="detail-box">
+                    <span class="detail-label">Registered Owner</span>
+                    <strong id="modalOwner">Rahul Sharma</strong>
+                </div>
+                <div class="detail-box">
+                    <span class="detail-label">Fuel / Type</span>
+                    <strong id="modalFuel">Electric / EV</strong>
+                </div>
+                <div class="detail-box">
+                    <span class="detail-label">Assigned Slot</span>
+                    <strong id="modalSlot" style="color: #00f2fe;">Slot S1</strong>
+                </div>
+                <div class="detail-box">
+                    <span class="detail-label">Entry Timestamp</span>
+                    <strong id="modalTime">10:45 AM</strong>
+                </div>
+            </div>
+            <button class="glow-btn" onclick="closeDetailsModal()">Confirm & Grant Access</button>
+        </div>
+    </div>
+
+    <!-- Toast / Save Creds Notification -->
+    <div id="toastNotification" class="toast-popup">
+        <div class="toast-content">
+            <span class="toast-icon">🔐</span>
+            <div class="toast-text">
+                <strong id="toastTitle">Save Credentials?</strong>
+                <p id="toastMessage">Keep your session remembered securely.</p>
+            </div>
+        </div>
+        <div class="toast-actions">
+            <button class="toast-btn primary" onclick="acceptSaveCreds()">Save</button>
+            <button class="toast-btn secondary" onclick="closeToast()">Never</button>
+        </div>
+    </div>
+
+    <!-- Auth Modal with Car Illustration Sidebar -->
+    <div id="authOverlay">
+        <div class="auth-box-wrapper">
+            
+            <!-- Left Side: Visual Car Graphic & Highlights -->
+            <div class="auth-visual-side">
+                <div class="visual-header">
+                    <span class="pill-badge">⚡ AI SMART HUB</span>
+                    <h2>Next-Gen Smart Parking System</h2>
+                    <p>Automated ANPR Sensor Capture & Cloud Booking Grid</p>
+                </div>
+
+                <!-- Modern Vector Cyber Car Diagram -->
+                <div class="car-diagram-box">
+                    <svg viewBox="0 0 500 220" class="cyber-car-svg">
+                        <defs>
+                            <linearGradient id="cyberNeon" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#00f2fe"/>
+                                <stop offset="100%" stop-color="#0284c7"/>
+                            </linearGradient>
+                            <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+                                <feGaussianBlur stdDeviation="6" result="blur"/>
+                                <feMerge>
+                                    <feMergeNode in="blur"/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </filter>
+                        </defs>
+                        <!-- Grid Floor Shadow -->
+                        <ellipse cx="250" cy="185" rx="200" ry="16" fill="rgba(0, 242, 254, 0.15)" />
+                        <!-- Car Body Outline -->
+                        <path d="M 60 145 L 90 145 L 120 110 L 190 70 L 320 70 L 400 115 L 450 125 L 460 150 L 40 150 Z" 
+                              fill="url(#cyberNeon)" opacity="0.85" filter="url(#neonGlow)"/>
+                        <!-- Cabin Window -->
+                        <path d="M 195 78 L 315 78 L 385 115 L 135 115 Z" fill="#091322" opacity="0.9"/>
+                        <!-- Windshield Pillar Divider -->
+                        <line x1="260" y1="78" x2="260" y2="115" stroke="#00f2fe" stroke-width="3"/>
+                        <!-- Headlights & Taillights -->
+                        <polygon points="450,130 460,135 448,140" fill="#38bdf8" filter="url(#neonGlow)"/>
+                        <polygon points="50,132 40,135 50,140" fill="#f43f5e" filter="url(#neonGlow)"/>
+                        <!-- Cyber Wheel 1 -->
+                        <circle cx="130" cy="155" r="30" fill="#060913" stroke="#00f2fe" stroke-width="4"/>
+                        <circle cx="130" cy="155" r="14" fill="#00f2fe" opacity="0.5"/>
+                        <circle cx="130" cy="155" r="5" fill="#fff"/>
+                        <!-- Cyber Wheel 2 -->
+                        <circle cx="370" cy="155" r="30" fill="#060913" stroke="#00f2fe" stroke-width="4"/>
+                        <circle cx="370" cy="155" r="14" fill="#00f2fe" opacity="0.5"/>
+                        <circle cx="370" cy="155" r="5" fill="#fff"/>
+                        <!-- Speed / Sensor Rays -->
+                        <line x1="455" y1="135" x2="495" y2="135" stroke="#00f2fe" stroke-width="2" stroke-dasharray="4,4"/>
+                        <line x1="445" y1="120" x2="485" y2="105" stroke="#00f2fe" stroke-width="2" stroke-dasharray="4,4"/>
+                    </svg>
+                </div>
+
+                <div class="visual-features">
+                    <div class="feat-badge"><span>🎯</span> 99.8% ANPR Rate</div>
+                    <div class="feat-badge"><span>⚡</span> 0.5s Barrier Lift</div>
+                    <div class="feat-badge"><span>🛡️</span> RTO Linked</div>
+                </div>
+            </div>
+
+            <!-- Right Side: Forms (Sign In / Sign Up / Reset) -->
+            <div class="auth-card">
+                <div class="auth-tabs" id="authTabsContainer">
+                    <button class="tab-btn active" id="loginTab" onclick="switchAuthTab('login')">Sign In</button>
+                    <button class="tab-btn" id="signupTab" onclick="switchAuthTab('signup')">Sign Up</button>
+                </div>
+
+                <!-- Sign In Form -->
+                <form id="loginForm" class="auth-form active" onsubmit="handleLogin(event)">
+                    <h2>Welcome Back</h2>
+                    <p class="subtitle">Log in to Automated Vehicle Sensor Network</p>
+                    <div class="input-group">
+                        <input type="text" id="loginUsername" required placeholder=" ">
+                        <label>Username</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="loginPassword" required placeholder=" ">
+                        <label>Password</label>
+                    </div>
+                    <div class="form-extra">
+                        <a href="javascript:void(0)" onclick="switchAuthTab('forgot')" class="forgot-link">Forgot Password?</a>
+                    </div>
+                    <button type="submit" class="glow-btn">Sign In to Hub</button>
+                </form>
+
+                <!-- Sign Up Form -->
+                <form id="signupForm" class="auth-form" onsubmit="handleSignup(event)">
+                    <h2>Create Account</h2>
+                    <p class="subtitle">Register to manage smart sensor slots</p>
+                    <div class="input-group">
+                        <input type="text" id="regUsername" required placeholder=" ">
+                        <label>Username</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="email" id="regEmail" required placeholder=" ">
+                        <label>Email Address</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="regPassword" required placeholder=" ">
+                        <label>Password</label>
+                    </div>
+                    <button type="submit" class="glow-btn">Sign Up</button>
+                </form>
+
+                <!-- Forgot Password Form -->
+                <form id="forgotForm" class="auth-form" onsubmit="handleForgotPassword(event)">
+                    <h2>Reset Password</h2>
+                    <p class="subtitle">Enter username & verified email</p>
+                    <div class="input-group">
+                        <input type="text" id="forgotUsername" required placeholder=" ">
+                        <label>Username</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="email" id="forgotEmail" required placeholder=" ">
+                        <label>Email Address</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="forgotNewPassword" required placeholder=" ">
+                        <label>New Password</label>
+                    </div>
+                    <button type="submit" class="glow-btn">Reset Password</button>
+                    <button type="button" class="back-link" onclick="switchAuthTab('login')">← Back to Sign In</button>
+                </form>
+
+                <p id="authMessage"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header Navigation -->
+    <header class="app-header">
+        <div class="header-brand">
+            <div class="radar-dot"></div>
+            <div>
+                <h1>Smart Parking System</h1>
+                <span class="sub-brand">Automated Vehicle Capture & Sensor Grid</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <span class="user-pill" id="userDisplay">Operator: Admin</span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </header>
+
+    <!-- Main Dashboard -->
+    <main id="dashboard" class="dashboard-container">
+        
+        <!-- Hero Section -->
+        <section class="hero-banner">
+            <div class="hero-text">
+                <span class="badge-pill">🚗 Real-Time AI Parking Grid</span>
+                <h2>Smart Car Parking Slot Booking System</h2>
+                <p>Equipped with dual-lane automated boom barriers, optical number plate recognition (ANPR), and integrated vehicle registry verification. Position vehicle at the entry lane for instant scanning.</p>
+            </div>
+            <div class="hero-badge-box">
+                <div class="badge-item">
+                    <span class="badge-num">100%</span>
+                    <span class="badge-label">AI Automation</span>
+                </div>
+                <div class="badge-item">
+                    <span class="badge-num">₹5 /min</span>
+                    <span class="badge-label">Parking Tariff</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Metrics Section -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-title">Total Capacity</span>
+                <span class="counter" id="total">10</span>
+            </div>
+            <div class="stat-card stat-available">
+                <span class="stat-title">Available Slots</span>
+                <span class="counter" id="available">10</span>
+            </div>
+            <div class="stat-card stat-occupied">
+                <span class="stat-title">Occupied Slots</span>
+                <span class="counter" id="occupied">0</span>
+            </div>
+        </section>
+
+        <!-- Dual Lane Road & Camera Hub -->
+        <section class="traffic-control-hub">
+            
+            <!-- Left Side: Entry Lane Road & Barrier -->
+            <div class="lane-block entry-lane-block">
+                <div class="lane-header">
+                    <span class="lane-title">⚡ ENTRY ROAD & BARRIER</span>
+                </div>
+                <div class="road-container">
+                    <div class="road-surface">
+                        <div class="road-lines"></div>
+                        <div class="lane-direction">ENTRY ➔➔</div>
+                        <!-- Animated Entry Car -->
+                        <div id="entryCar" class="animated-car">
+                            <div class="car-body red-car">
+                                <span class="car-windshield"></span>
+                                <span class="car-plate-tag" id="entryCarPlate">IN-SCAN</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Entry Barrier -->
+                    <div id="entryGate" class="gate-wrapper">
+                        <div class="gate-light"></div>
+                        <div class="gate-base"><div class="gate-arm"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center: Live Camera Sensor with On/Off Toggle -->
+            <div class="camera-center-block">
+                <div class="camera-card">
+                    <div class="cam-header">
+                        <span class="live-tag" id="liveTagIndicator"><span class="blink">●</span> AI OPTICAL SCANNER</span>
+                        <!-- Camera On / Off Toggle Button -->
+                        <button id="cameraToggleBtn" class="cam-toggle-btn active" onclick="toggleCamera()">
+                            📷 Camera ON
+                        </button>
+                    </div>
+                    <div class="video-container">
+                        <video id="video" autoplay playsinline muted></video>
+                        <canvas id="captureCanvas" style="display:none;"></canvas>
+                        
+                        <!-- Offline Overlay shown when Camera is Off -->
+                        <div id="cameraOffOverlay" class="cam-offline-screen">
+                            <span class="offline-icon">📹❌</span>
+                            <p>Camera is Powered OFF</p>
+                            <small>Click "Camera OFF" to restore live sensor stream</small>
+                        </div>
+
+                        <div class="scan-overlay" id="scanOverlay">
+                            <div class="scan-line"></div>
+                            <div class="target-box">
+                                <span class="corner tl"></span>
+                                <span class="corner tr"></span>
+                                <span class="corner bl"></span>
+                                <span class="corner br"></span>
+                                <span class="target-label">ALIGN PLATE HERE</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="sensorStatus" class="sensor-status status-idle">
+                        Status: Sensor Ready. Position vehicle number plate inside frame.
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="action-btn btn-entry" id="btnCapture" onclick="captureAndProcessPlate()">
+                            🔍 Scan & Enter Car
+                        </button>
+                        <button class="action-btn btn-exit" onclick="vehicleExit()">
+                            ➔ Process Exit
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Exit Lane Road & Barrier -->
+            <div class="lane-block exit-lane-block">
+                <div class="lane-header">
+                    <span class="lane-title">➔ EXIT ROAD & BARRIER</span>
+                </div>
+                <div class="road-container">
+                    <div class="road-surface">
+                        <div class="road-lines"></div>
+                        <div class="lane-direction">➔➔ EXIT</div>
+                        <!-- Animated Exit Car -->
+                        <div id="exitCar" class="animated-car">
+                            <div class="car-body blue-car">
+                                <span class="car-windshield"></span>
+                                <span class="car-plate-tag" id="exitCarPlate">OUT</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Exit Barrier -->
+                    <div id="exitGate" class="gate-wrapper">
+                        <div class="gate-light"></div>
+                        <div class="gate-base"><div class="gate-arm"></div></div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Parking Slots Grid -->
+        <section class="slots-section">
+            <div class="slots-header">
+                <div>
+                    <h3 class="section-title">Car Parking Slot Matrix</h3>
+                    <p class="section-subtitle">Click on any <span style="color:#00f2fe;">Green Slot</span> to manual-book, or use the camera sensor above</p>
+                </div>
+                <div class="legend">
+                    <span class="legend-item"><span class="dot green"></span> Available</span>
+                    <span class="legend-item"><span class="dot red"></span> Occupied</span>
+                </div>
+            </div>
+            <div id="parking" class="slots-grid"></div>
+        </section>
+
+        <!-- Transaction Logs -->
+        <section class="table-section">
+            <h3 class="section-title">Automated Sensor Transaction History</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Plate Number</th>
+                            <th>Vehicle Owner & Model</th>
+                            <th>Slot Assigned</th>
+                            <th>Entry Time</th>
+                            <th>Exit Time</th>
+                            <th>Fee</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTable"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
