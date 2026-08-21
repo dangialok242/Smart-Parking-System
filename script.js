@@ -4,6 +4,7 @@ let vehicles = {};
 let pendingLoginData = null;
 let cameraStream = null;
 let isCameraActive = false;
+let currentFacingMode = "user"; // "user" (front) or "environment" (back)
 
 // Mock Indian Vehicle RTO Registry Database
 const vehicleRegistryDatabase = {
@@ -85,7 +86,7 @@ function handleLogin(e) {
         document.getElementById("authOverlay").style.display = "none";
         document.getElementById("dashboard").style.display = "flex";
         document.getElementById("userDisplay").innerText = "Operator: " + user;
-        startCamera();
+        startCamera(currentFacingMode);
 
         const saved = JSON.parse(localStorage.getItem("saved_parking_session") || "null");
         if (!saved || saved.username !== user) {
@@ -145,21 +146,70 @@ function acceptSaveCreds() {
 }
 
 // ==========================================
-// CAMERA ON / OFF TOGGLE CONTROLLER
+// CAMERA CONTROLLER & SWITCH LOGIC
 // ==========================================
 
-function startCamera() {
-    navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } })
+async function checkBackCameraAvailable() {
+    try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+            return false;
+        }
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter(device => device.kind === 'videoinput');
+        
+        // Agar label ya settings se pata chal sake ya 2 se zyada cameras ho
+        const hasBackLabel = videoDevices.some(d => 
+            d.label.toLowerCase().includes('back') || 
+            d.label.toLowerCase().includes('rear') || 
+            d.label.toLowerCase().includes('environment')
+        );
+
+        return hasBackLabel || videoDevices.length > 1;
+    } catch (e) {
+        return false;
+    }
+}
+
+function startCamera(facingMode = "user") {
+    if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream = null;
+    }
+
+    const constraints = {
+        video: {
+            facingMode: { exact: facingMode },
+            width: { ideal: 640 },
+            height: { ideal: 480 }
+        }
+    };
+
+    navigator.mediaDevices.getUserMedia(constraints)
         .then(stream => {
             cameraStream = stream;
             document.getElementById("video").srcObject = stream;
             isCameraActive = true;
+            currentFacingMode = facingMode;
             updateCameraUI(true);
-            updateSensorStatus("Camera Sensor Active. Position plate inside frame.", "idle");
+            updateSensorStatus(`Camera Sensor Active (${facingMode === 'user' ? 'Front' : 'Back'}). Position plate inside frame.`, "idle");
+            updateSwitchButtonText();
         })
-        .catch(() => {
-            updateCameraUI(false);
-            updateSensorStatus("Camera access denied or webcam unavailable.", "error");
+        .catch(err => {
+            // Fallback for browsers/devices that don't support { exact }
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: facingMode, width: 640, height: 480 } })
+                .then(stream => {
+                    cameraStream = stream;
+                    document.getElementById("video").srcObject = stream;
+                    isCameraActive = true;
+                    currentFacingMode = facingMode;
+                    updateCameraUI(true);
+                    updateSensorStatus(`Camera Sensor Active (${facingMode === 'user' ? 'Front' : 'Back'}). Position plate inside frame.`, "idle");
+                    updateSwitchButtonText();
+                })
+                .catch(() => {
+                    updateCameraUI(false);
+                    updateSensorStatus("Camera access denied or device unavailable.", "error");
+                });
         });
 }
 
@@ -178,7 +228,42 @@ function toggleCamera() {
     if (isCameraActive) {
         stopCamera();
     } else {
-        startCamera();
+        startCamera(currentFacingMode);
+    }
+}
+
+async function switchCamera() {
+    if (!isCameraActive) {
+        alert("Pehle Camera ON karein!");
+        return;
+    }
+
+    if (currentFacingMode === "user") {
+        const isBackAvailable = await checkBackCameraAvailable();
+        
+        // Test requesting back camera
+        try {
+            const testStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: { exact: "environment" } }
+            });
+            testStream.getTracks().forEach(track => track.stop());
+            startCamera("environment");
+        } catch (err) {
+            alert("⚠️ Back camera is not available on this device! Switching canceled.");
+            updateSensorStatus("Back Camera unavailable. Running Front Camera.", "error");
+        }
+    } else {
+        startCamera("user");
+    }
+}
+
+function updateSwitchButtonText() {
+    const switchBtn = document.getElementById("cameraSwitchBtn");
+    if (!switchBtn) return;
+    if (currentFacingMode === "user") {
+        switchBtn.innerText = "🔄 Switch (Back)";
+    } else {
+        switchBtn.innerText = "🔄 Switch (Front)";
     }
 }
 

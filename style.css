@@ -217,6 +217,28 @@ body {
 /* ===================================================
    CAMERA CONTROLS & OFFLINE HUD
    =================================================== */
+.cam-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cam-switch-btn {
+    background: rgba(0, 242, 254, 0.15);
+    border: 1px solid #00f2fe;
+    color: #00f2fe;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.cam-switch-btn:hover {
+    background: rgba(0, 242, 254, 0.3);
+}
+
 .cam-toggle-btn {
     background: rgba(16, 185, 129, 0.2);
     border: 1px solid #10b981;

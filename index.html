@@ -273,15 +273,21 @@
                 </div>
             </div>
 
-            <!-- Center: Live Camera Sensor with On/Off Toggle -->
+            <!-- Center: Live Camera Sensor with Controls -->
             <div class="camera-center-block">
                 <div class="camera-card">
                     <div class="cam-header">
                         <span class="live-tag" id="liveTagIndicator"><span class="blink">●</span> AI OPTICAL SCANNER</span>
-                        <!-- Camera On / Off Toggle Button -->
-                        <button id="cameraToggleBtn" class="cam-toggle-btn active" onclick="toggleCamera()">
-                            📷 Camera ON
-                        </button>
+                        <div class="cam-header-actions">
+                            <!-- Camera Switch (Front/Back) Button -->
+                            <button id="cameraSwitchBtn" class="cam-switch-btn" onclick="switchCamera()">
+                                🔄 Switch (Back)
+                            </button>
+                            <!-- Camera On / Off Toggle Button -->
+                            <button id="cameraToggleBtn" class="cam-toggle-btn active" onclick="toggleCamera()">
+                                📷 Camera ON
+                            </button>
+                        </div>
                     </div>
                     <div class="video-container">
                         <video id="video" autoplay playsinline muted></video>
