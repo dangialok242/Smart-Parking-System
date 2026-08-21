@@ -107,7 +107,7 @@ The parking slot matrix displays available and occupied spaces and allows parkin
 ## 7️⃣ Dual Lane Traffic Hub
 
 <p align="center">
-  <img src="Screenshot/Right%20and%20Left%20Road.png" width="780" alt="Right and Left Road">
+  <img src="Screenshot/Right and Left Road .png" width="780" alt="Right and Left Road">
 </p>
 
 The system simulates two separate traffic lanes:
