@@ -1,7 +1,6 @@
 let totalSlots = 10;
 let ratePerMinute = 5;
 let vehicles = {};
-let pendingLoginData = null;
 let cameraStream = null;
 let isCameraActive = false;
 let currentFacingMode = "user"; // "user" (front) or "environment" (back)
@@ -16,8 +15,15 @@ const vehicleRegistryDatabase = {
 };
 
 // ==========================================
-// AUTHENTICATION & LOGIN
+// FORM CLEANUP & TAB SWITCHING
 // ==========================================
+
+function clearAllAuthInputs() {
+    const inputs = document.querySelectorAll("#authOverlay input");
+    inputs.forEach(input => {
+        input.value = "";
+    });
+}
 
 function switchAuthTab(type) {
     const loginForm = document.getElementById("loginForm");
@@ -28,6 +34,8 @@ function switchAuthTab(type) {
     const authTabsContainer = document.getElementById("authTabsContainer");
     const msg = document.getElementById("authMessage");
     msg.innerText = "";
+
+    clearAllAuthInputs();
 
     loginForm.classList.remove("active");
     signupForm.classList.remove("active");
@@ -66,10 +74,12 @@ function handleSignup(e) {
     localStorage.setItem("parking_users", JSON.stringify(users));
 
     msg.style.color = "#10b981";
-    msg.innerText = "Account created! Switching to Sign In...";
+    msg.innerText = "Account created successfully! Redirecting to Sign In...";
+    
     setTimeout(() => {
         switchAuthTab('login');
-        document.getElementById("loginUsername").value = user;
+        // Clean blank inputs for user to manually re-type credentials
+        clearAllAuthInputs();
     }, 1200);
 }
 
@@ -86,13 +96,9 @@ function handleLogin(e) {
         document.getElementById("authOverlay").style.display = "none";
         document.getElementById("dashboard").style.display = "flex";
         document.getElementById("userDisplay").innerText = "Operator: " + user;
+        
+        clearAllAuthInputs();
         startCamera(currentFacingMode);
-
-        const saved = JSON.parse(localStorage.getItem("saved_parking_session") || "null");
-        if (!saved || saved.username !== user) {
-            pendingLoginData = { username: user, password: pass };
-            showToast("Save Credentials?", `Remember session for ${user}?`);
-        }
     } else {
         msg.style.color = "#f43f5e";
         msg.innerText = "Invalid Username or Password!";
@@ -113,7 +119,10 @@ function handleForgotPassword(e) {
         localStorage.setItem("parking_users", JSON.stringify(users));
         msg.style.color = "#10b981";
         msg.innerText = "Password updated! Redirecting to Sign In...";
-        setTimeout(() => switchAuthTab('login'), 1500);
+        setTimeout(() => {
+            switchAuthTab('login');
+            clearAllAuthInputs();
+        }, 1500);
     } else {
         msg.style.color = "#f43f5e";
         msg.innerText = "Verification failed: User or Email mismatch.";
@@ -122,27 +131,10 @@ function handleForgotPassword(e) {
 
 function logout() {
     stopCamera();
+    clearAllAuthInputs();
     document.getElementById("dashboard").style.display = "none";
     document.getElementById("authOverlay").style.display = "flex";
     switchAuthTab('login');
-}
-
-function showToast(title, message) {
-    document.getElementById("toastTitle").innerText = title;
-    document.getElementById("toastMessage").innerText = message;
-    document.getElementById("toastNotification").style.display = "flex";
-}
-
-function closeToast() {
-    document.getElementById("toastNotification").style.display = "none";
-    pendingLoginData = null;
-}
-
-function acceptSaveCreds() {
-    if (pendingLoginData) {
-        localStorage.setItem("saved_parking_session", JSON.stringify(pendingLoginData));
-    }
-    closeToast();
 }
 
 // ==========================================
@@ -157,7 +149,6 @@ async function checkBackCameraAvailable() {
         const devices = await navigator.mediaDevices.enumerateDevices();
         const videoDevices = devices.filter(device => device.kind === 'videoinput');
         
-        // Agar label ya settings se pata chal sake ya 2 se zyada cameras ho
         const hasBackLabel = videoDevices.some(d => 
             d.label.toLowerCase().includes('back') || 
             d.label.toLowerCase().includes('rear') || 
@@ -194,8 +185,7 @@ function startCamera(facingMode = "user") {
             updateSensorStatus(`Camera Sensor Active (${facingMode === 'user' ? 'Front' : 'Back'}). Position plate inside frame.`, "idle");
             updateSwitchButtonText();
         })
-        .catch(err => {
-            // Fallback for browsers/devices that don't support { exact }
+        .catch(() => {
             navigator.mediaDevices.getUserMedia({ video: { facingMode: facingMode, width: 640, height: 480 } })
                 .then(stream => {
                     cameraStream = stream;
@@ -239,9 +229,6 @@ async function switchCamera() {
     }
 
     if (currentFacingMode === "user") {
-        const isBackAvailable = await checkBackCameraAvailable();
-        
-        // Test requesting back camera
         try {
             const testStream = await navigator.mediaDevices.getUserMedia({
                 video: { facingMode: { exact: "environment" } }
@@ -551,11 +538,8 @@ function openGate(id) {
 }
 
 window.onload = function () {
-    const saved = JSON.parse(localStorage.getItem("saved_parking_session") || "null");
-    if (saved) {
-        document.getElementById("loginUsername").value = saved.username;
-        document.getElementById("loginPassword").value = saved.password;
-    }
+    // Clear pre-filled input forms
+    clearAllAuthInputs();
 
     let parking = document.getElementById("parking");
     parking.innerHTML = "";

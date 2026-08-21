@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Smart Parking & Real-Time Plate Capture</title>
+    <!-- Browser Tab Favicon / Logo -->
+    <link rel="icon" type="image/png" href="Screenshot/logo .png">
+    <link rel="shortcut icon" type="image/png" href="Car Parking Logo.png">
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <!-- OCR Engine for Live Number Plate Extraction -->
@@ -44,21 +47,6 @@
                 </div>
             </div>
             <button class="glow-btn" onclick="closeDetailsModal()">Confirm & Grant Access</button>
-        </div>
-    </div>
-
-    <!-- Toast / Save Creds Notification -->
-    <div id="toastNotification" class="toast-popup">
-        <div class="toast-content">
-            <span class="toast-icon">🔐</span>
-            <div class="toast-text">
-                <strong id="toastTitle">Save Credentials?</strong>
-                <p id="toastMessage">Keep your session remembered securely.</p>
-            </div>
-        </div>
-        <div class="toast-actions">
-            <button class="toast-btn primary" onclick="acceptSaveCreds()">Save</button>
-            <button class="toast-btn secondary" onclick="closeToast()">Never</button>
         </div>
     </div>
 
@@ -131,15 +119,15 @@
                 </div>
 
                 <!-- Sign In Form -->
-                <form id="loginForm" class="auth-form active" onsubmit="handleLogin(event)">
+                <form id="loginForm" class="auth-form active" onsubmit="handleLogin(event)" autocomplete="off">
                     <h2>Welcome Back</h2>
                     <p class="subtitle">Log in to Automated Vehicle Sensor Network</p>
                     <div class="input-group">
-                        <input type="text" id="loginUsername" required placeholder=" ">
+                        <input type="text" id="loginUsername" required placeholder=" " autocomplete="off">
                         <label>Username</label>
                     </div>
                     <div class="input-group">
-                        <input type="password" id="loginPassword" required placeholder=" ">
+                        <input type="password" id="loginPassword" required placeholder=" " autocomplete="new-password">
                         <label>Password</label>
                     </div>
                     <div class="form-extra">
@@ -149,38 +137,38 @@
                 </form>
 
                 <!-- Sign Up Form -->
-                <form id="signupForm" class="auth-form" onsubmit="handleSignup(event)">
+                <form id="signupForm" class="auth-form" onsubmit="handleSignup(event)" autocomplete="off">
                     <h2>Create Account</h2>
                     <p class="subtitle">Register to manage smart sensor slots</p>
                     <div class="input-group">
-                        <input type="text" id="regUsername" required placeholder=" ">
+                        <input type="text" id="regUsername" required placeholder=" " autocomplete="off">
                         <label>Username</label>
                     </div>
                     <div class="input-group">
-                        <input type="email" id="regEmail" required placeholder=" ">
+                        <input type="email" id="regEmail" required placeholder=" " autocomplete="off">
                         <label>Email Address</label>
                     </div>
                     <div class="input-group">
-                        <input type="password" id="regPassword" required placeholder=" ">
+                        <input type="password" id="regPassword" required placeholder=" " autocomplete="new-password">
                         <label>Password</label>
                     </div>
                     <button type="submit" class="glow-btn">Sign Up</button>
                 </form>
 
                 <!-- Forgot Password Form -->
-                <form id="forgotForm" class="auth-form" onsubmit="handleForgotPassword(event)">
+                <form id="forgotForm" class="auth-form" onsubmit="handleForgotPassword(event)" autocomplete="off">
                     <h2>Reset Password</h2>
                     <p class="subtitle">Enter username & verified email</p>
                     <div class="input-group">
-                        <input type="text" id="forgotUsername" required placeholder=" ">
+                        <input type="text" id="forgotUsername" required placeholder=" " autocomplete="off">
                         <label>Username</label>
                     </div>
                     <div class="input-group">
-                        <input type="email" id="forgotEmail" required placeholder=" ">
+                        <input type="email" id="forgotEmail" required placeholder=" " autocomplete="off">
                         <label>Email Address</label>
                     </div>
                     <div class="input-group">
-                        <input type="password" id="forgotNewPassword" required placeholder=" ">
+                        <input type="password" id="forgotNewPassword" required placeholder=" " autocomplete="new-password">
                         <label>New Password</label>
                     </div>
                     <button type="submit" class="glow-btn">Reset Password</button>
@@ -195,7 +183,7 @@
     <!-- Header Navigation -->
     <header class="app-header">
         <div class="header-brand">
-            <div class="radar-dot"></div>
+            <img src="Car Parking Logo.png" alt="Parking Logo" class="brand-logo">
             <div>
                 <h1>Smart Parking System</h1>
                 <span class="sub-brand">Automated Vehicle Capture & Sensor Grid</span>
